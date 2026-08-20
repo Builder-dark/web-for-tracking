@@ -1,121 +1,232 @@
-// State
-let tasks = [];
-let categories = ['Personal', 'Work', 'Assignments'];
-let activeCategory = 'Personal';
+// State Management (Saved in LocalStorage)
+let lists = JSON.parse(localStorage.getItem('gt_lists')) || ['My Tasks', 'Assignments', 'Personal'];
+let activeList = localStorage.getItem('gt_activeList') || 'My Tasks';
+let tasks = JSON.parse(localStorage.getItem('gt_tasks')) || [];
+let selectedTaskId = null;
 
 // DOM Elements
-const taskInput = document.getElementById('taskInput');
-const addBtn = document.getElementById('addBtn');
-const tabsContainer = document.getElementById('tabsContainer');
-const taskGrid = document.getElementById('taskGrid');
-const newGroupInput = document.getElementById('newGroupInput');
-const addGroupBtn = document.getElementById('addGroupBtn');
-const deleteGroupBtn = document.getElementById('deleteGroupBtn');
+const listsContainer = document.getElementById('listsContainer');
+const currentListTitle = document.getElementById('currentListTitle');
+const newListBtn = document.getElementById('newListBtn');
+const deleteListBtn = document.getElementById('deleteListBtn');
 
-// Initialize
-function init() {
-  renderTabs();
-  renderTasks();
+const quickTaskInput = document.getElementById('quickTaskInput');
+const quickAddBtn = document.getElementById('quickAddBtn');
+
+const pendingTasksList = document.getElementById('pendingTasksList');
+const completedTasksList = document.getElementById('completedTasksList');
+const completedCount = document.getElementById('completedCount');
+
+const detailPanel = document.getElementById('detailPanel');
+const closeDetailBtn = document.getElementById('closeDetailBtn');
+const detailTitle = document.getElementById('detailTitle');
+const detailSubject = document.getElementById('detailSubject');
+const detailType = document.getElementById('detailType');
+const detailDescription = document.getElementById('detailDescription');
+const saveDetailBtn = document.getElementById('saveDetailBtn');
+const deleteTaskBtn = document.getElementById('deleteTaskBtn');
+
+// Helper: Save to LocalStorage
+function saveData() {
+  localStorage.setItem('gt_lists', JSON.stringify(lists));
+  localStorage.setItem('gt_activeList', activeList);
+  localStorage.setItem('gt_tasks', JSON.stringify(tasks));
 }
 
-// Render Tabs
-function renderTabs() {
-  tabsContainer.innerHTML = '';
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = `tab ${activeCategory === cat ? 'active' : ''}`;
-    btn.textContent = cat;
-    btn.onclick = () => {
-      activeCategory = cat;
-      renderTabs();
+// Initialize Application
+function init() {
+  renderLists();
+  renderTasks();
+  attachEvents();
+}
+
+// Render Side Lists
+function renderLists() {
+  listsContainer.innerHTML = '';
+  lists.forEach(listName => {
+    const item = document.createElement('div');
+    item.className = `list-item ${listName === activeList ? 'active' : ''}`;
+    item.textContent = listName;
+    item.onclick = () => {
+      activeList = listName;
+      closeDrawer();
+      saveData();
+      renderLists();
       renderTasks();
     };
-    tabsContainer.appendChild(btn);
+    listsContainer.appendChild(item);
   });
+  currentListTitle.textContent = activeList;
 }
 
-// Render Task Grid
+// Render Task List Area
 function renderTasks() {
-  taskGrid.innerHTML = '';
+  pendingTasksList.innerHTML = '';
+  completedTasksList.innerHTML = '';
 
-  const filteredTasks = tasks.filter(t => t.category === activeCategory);
+  const listTasks = tasks.filter(t => t.list === activeList);
+  const pending = listTasks.filter(t => !t.completed);
+  const completed = listTasks.filter(t => t.completed);
 
-  if (filteredTasks.length === 0) {
-    taskGrid.innerHTML = `<div style="color: #9ca3af; font-size: 0.875rem;">No tasks in this group.</div>`;
-    return;
-  }
+  completedCount.textContent = completed.length;
 
-  filteredTasks.forEach(task => {
-    const card = document.createElement('div');
-    card.className = `card ${task.completed ? 'done' : ''}`;
-    card.innerHTML = `
-      <div>
-        <div class="category-tag">${task.category}</div>
-        <div class="card-text">${escapeHTML(task.text)}</div>
-      </div>
-      <div class="card-actions">
-        <button class="action-link" onclick="toggleTask(${task.id})">
-          ${task.completed ? 'Undo' : 'Done'}
-        </button>
-        <button class="action-link delete" onclick="deleteTask(${task.id})">Delete</button>
-      </div>
-    `;
-    taskGrid.appendChild(card);
+  // Render Pending Tasks
+  pending.forEach(task => {
+    pendingTasksList.appendChild(createTaskCard(task));
+  });
+
+  // Render Completed Tasks
+  completed.forEach(task => {
+    completedTasksList.appendChild(createTaskCard(task));
   });
 }
 
-// Add Task
-addBtn.addEventListener('click', () => {
-  const text = taskInput.value.trim();
-  if (!text) return;
+// Create Card HTML DOM Element
+function createTaskCard(task) {
+  const card = document.createElement('div');
+  card.className = `task-card ${task.completed ? 'completed' : ''}`;
+  card.onclick = (e) => {
+    if (!e.target.closest('.checkbox-btn')) {
+      openDetailDrawer(task.id);
+    }
+  };
 
-  tasks.push({
+  card.innerHTML = `
+    <button class="checkbox-btn ${task.completed ? 'checked' : ''}" onclick="toggleTaskStatus(${task.id})">
+      <span class="material-symbols-outlined">
+        ${task.completed ? 'check_circle' : 'radio_button_unchecked'}
+      </span>
+    </button>
+    <div class="task-info">
+      <div class="task-title">${escapeHTML(task.title)}</div>
+      <div class="task-meta">
+        ${task.subject ? `<span class="badge subject-badge">${escapeHTML(task.subject)}</span>` : ''}
+        ${task.type ? `<span class="badge">${escapeHTML(task.type)}</span>` : ''}
+      </div>
+      ${task.description ? `<div class="task-desc-preview">${escapeHTML(task.description)}</div>` : ''}
+    </div>
+  `;
+
+  return card;
+}
+
+// Quick Add Task
+function addTask() {
+  const title = quickTaskInput.value.trim();
+  if (!title) return;
+
+  const newTask = {
     id: Date.now(),
-    text: text,
-    category: activeCategory,
+    list: activeList,
+    title: title,
+    subject: '',
+    type: 'General',
+    description: '',
     completed: false
-  });
+  };
 
-  taskInput.value = '';
-  renderTasks();
-});
-
-// Toggle Task Done/Undo
-function toggleTask(id) {
-  tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+  tasks.push(newTask);
+  quickTaskInput.value = '';
+  saveData();
   renderTasks();
 }
+
+// Toggle Completed State
+window.toggleTaskStatus = function(id) {
+  tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+  saveData();
+  renderTasks();
+};
+
+// Detail Drawer Management
+function openDetailDrawer(taskId) {
+  selectedTaskId = taskId;
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  detailTitle.value = task.title || '';
+  detailSubject.value = task.subject || '';
+  detailType.value = task.type || 'General';
+  detailDescription.value = task.description || '';
+
+  detailPanel.classList.add('open');
+}
+
+function closeDrawer() {
+  selectedTaskId = null;
+  detailPanel.classList.remove('open');
+}
+
+// Save Expanded Task Details
+saveDetailBtn.addEventListener('click', () => {
+  if (!selectedTaskId) return;
+
+  tasks = tasks.map(t => {
+    if (t.id === selectedTaskId) {
+      return {
+        ...t,
+        title: detailTitle.value.trim() || t.title,
+        subject: detailSubject.value.trim(),
+        type: detailType.value,
+        description: detailDescription.value.trim()
+      };
+    }
+    return t;
+  });
+
+  saveData();
+  renderTasks();
+  closeDrawer();
+});
 
 // Delete Task
-function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
+deleteTaskBtn.addEventListener('click', () => {
+  if (!selectedTaskId) return;
+  tasks = tasks.filter(t => t.id !== selectedTaskId);
+  saveData();
   renderTasks();
+  closeDrawer();
+});
+
+// Event Listeners Initialization
+function attachEvents() {
+  quickAddBtn.addEventListener('click', addTask);
+  quickTaskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  closeDetailBtn.addEventListener('click', closeDrawer);
+
+  // New List
+  newListBtn.addEventListener('click', () => {
+    const name = prompt('Enter new list name:');
+    if (name && !lists.includes(name.trim())) {
+      const cleanName = name.trim();
+      lists.push(cleanName);
+      activeList = cleanName;
+      saveData();
+      renderLists();
+      renderTasks();
+    }
+  });
+
+  // Delete List
+  deleteListBtn.addEventListener('click', () => {
+    if (lists.length <= 1) {
+      alert('You must keep at least one list.');
+      return;
+    }
+    if (confirm(`Delete list "${activeList}" and all its tasks?`)) {
+      tasks = tasks.filter(t => t.list !== activeList);
+      lists = lists.filter(l => l !== activeList);
+      activeList = lists[0];
+      closeDrawer();
+      saveData();
+      renderLists();
+      renderTasks();
+    }
+  });
 }
-
-// Add New Group
-addGroupBtn.addEventListener('click', () => {
-  const name = newGroupInput.value.trim();
-  if (name && !categories.includes(name)) {
-    categories.push(name);
-    activeCategory = name;
-    newGroupInput.value = '';
-    renderTabs();
-    renderTasks();
-  }
-});
-
-// Delete Active Group
-deleteGroupBtn.addEventListener('click', () => {
-  if (categories.length <= 1) return;
-
-  // Reassign tasks in this group to another existing category
-  categories = categories.filter(c => c !== activeCategory);
-  tasks = tasks.filter(t => t.category !== activeCategory);
-
-  activeCategory = categories[0];
-  renderTabs();
-  renderTasks();
-});
 
 function escapeHTML(str) {
   return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));

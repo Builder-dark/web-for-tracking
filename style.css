@@ -1,0 +1,127 @@
+/* General Setup */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #eaeded; /* Amazon Gray Background */
+  margin: 0;
+  padding: 0;
+}
+
+/* Amazon Header */
+.navbar {
+  background-color: #131921;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 15px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.logo span {
+  color: #ff9900; /* Amazon Orange */
+}
+
+.search-box {
+  display: flex;
+  flex: 1;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  font-size: 14px;
+}
+
+.search-box button {
+  background-color: #febd69; /* Amazon Yellow */
+  border: none;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Amazon Sub-bar */
+.subnav {
+  background-color: #232f3e;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.subnav select, .subnav input {
+  padding: 5px;
+}
+
+.subnav button {
+  background-color: #ffd814;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.btn-danger-sm {
+  background-color: #ff4d4d !important;
+  color: white;
+}
+
+/* Grid layout for Amazon-style Boxes */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  padding: 20px;
+}
+
+/* Individual Amazon Card Box */
+.card {
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card.done {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.badge {
+  font-size: 11px;
+  background-color: #f0f2f2;
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  width: fit-content;
+  margin-bottom: 8px;
+}
+
+.card-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 5px;
+}
+
+.card-actions button {
+  flex: 1;
+  padding: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-complete {
+  background-color: #ffd814;
+  border: 1px solid #fcd200;
+}
+
+.btn-delete {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  color: red;
+}

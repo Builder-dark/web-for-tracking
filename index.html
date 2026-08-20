@@ -2,31 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amazon Style Tasks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Task Manager</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header class="navbar">
-    <div class="logo">task<span>store</span></div>
-    
+    <div class="logo">Tasks</div>
     <div class="search-box">
       <input type="text" id="taskInput" placeholder="Add a new task...">
-      <button id="addBtn">Add Task</button>
+      <button id="addBtn">Add</button>
     </div>
   </header>
 
   <div class="subnav">
-    <select id="categorySelect">
-      <option value="Personal">Personal</option>
-      <option value="Work">Work</option>
-      <option value="Assignments">Assignments</option>
-    </select>
-
-    <div class="group-control">
-      <input type="text" id="newGroupInput" placeholder="New group name...">
-      <button id="addGroupBtn">+ Add Group</button>
-      <button id="deleteGroupBtn" class="btn-danger-sm">Delete Current Group</button>
+    <div class="tabs" id="tabsContainer"></div>
+    <div class="group-controls">
+      <input type="text" id="newGroupInput" placeholder="New group...">
+      <button id="addGroupBtn">+ Group</button>
+      <button id="deleteGroupBtn" class="btn-text-danger">Delete Group</button>
     </div>
   </div>
 

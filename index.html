@@ -3,29 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimal Task Manager</title>
+  <title>Google Tasks Copy</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body>
 
-  <header class="navbar">
-    <div class="logo">Tasks</div>
-    <div class="search-box">
-      <input type="text" id="taskInput" placeholder="Add a new task...">
-      <button id="addBtn">Add</button>
-    </div>
-  </header>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="material-symbols-outlined logo-icon">check_circle</span>
+        <h2>Tasks</h2>
+      </div>
 
-  <div class="subnav">
-    <div class="tabs" id="tabsContainer"></div>
-    <div class="group-controls">
-      <input type="text" id="newGroupInput" placeholder="New group...">
-      <button id="addGroupBtn">+ Group</button>
-      <button id="deleteGroupBtn" class="btn-text-danger">Delete Group</button>
-    </div>
+      <div class="lists-container" id="listsContainer"></div>
+
+      <button class="btn-add-list" id="newListBtn">
+        <span class="material-symbols-outlined">add</span>
+        <span>Create new list</span>
+      </button>
+    </aside>
+
+    <main class="main-content">
+      <header class="task-header">
+        <h1 id="currentListTitle">My Tasks</h1>
+        <button class="btn-icon-danger" id="deleteListBtn" title="Delete current list">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </header>
+
+      <div class="add-task-bar">
+        <span class="material-symbols-outlined add-icon">add</span>
+        <input type="text" id="quickTaskInput" placeholder="Add a task">
+        <button id="quickAddBtn">Save</button>
+      </div>
+
+      <div class="task-sections">
+        <div class="task-list" id="pendingTasksList"></div>
+
+        <details class="completed-section" open>
+          <summary class="completed-header">
+            <span>Completed (<span id="completedCount">0</span>)</span>
+          </summary>
+          <div class="task-list" id="completedTasksList"></div>
+        </details>
+      </div>
+    </main>
+
+    <aside class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <span>Task Details</span>
+        <button class="btn-icon" id="closeDetailBtn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="detail-body" id="detailForm">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="detailTitle" placeholder="Task title">
+        </div>
+
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" id="detailSubject" placeholder="e.g. Mathematics, Science, Project">
+        </div>
+
+        <div class="form-group">
+          <label>Type / Tag</label>
+          <select id="detailType">
+            <option value="General">General Task</option>
+            <option value="Assignment">Assignment</option>
+            <option value="Project">Project</option>
+            <option value="Exam">Exam Prep</option>
+            <option value="Homework">Homework</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Details / Description</label>
+          <textarea id="detailDescription" rows="4" placeholder="Add details, instructions, or notes..."></textarea>
+        </div>
+
+        <div class="detail-actions">
+          <button id="saveDetailBtn" class="btn-primary">Save Details</button>
+          <button id="deleteTaskBtn" class="btn-danger">Delete Task</button>
+        </div>
+      </div>
+    </aside>
   </div>
-
-  <main class="grid-container" id="taskGrid"></main>
 
   <script src="script.js"></script>
 </body>
